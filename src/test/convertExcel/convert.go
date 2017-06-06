@@ -95,6 +95,9 @@ func convert(excelFileName string) {
 						if t == "int" {
 							valNumber, _ := strconv.Atoi(d)
 							dMap[en] = valNumber
+						} else if t == "float" {
+							valNumber, _ := strconv.ParseFloat(d, 64)
+							dMap[en] = valNumber
 						} else {
 							dMap[en] = d
 						}
