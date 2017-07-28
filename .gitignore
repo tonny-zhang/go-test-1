@@ -34,4 +34,5 @@ src/test/convertExcel/data
 src/test/convertExcel/output
 src/test/uploadAndRestart/data
 src/test/parseMesh/data
-src/test/parseMesh/output
+src/test/parseMesh/meshData
+src/test/parseMesh/meshImg
