@@ -84,10 +84,15 @@ func convert(excelFileName string) {
 			if len > 0 && len <= lenZHCell {
 				var dMap = make(map[string]interface{})
 				var lenNull = 0
+				var isEmpty = false;
 				for index, cell := range row.Cells {
 					if index < lenCellActual {
 						d, _ := cell.String()
 						if d == "" {
+							if index == 0 {
+								isEmpty = true;
+								break;
+							}
 							lenNull++
 						}
 						en, _ := nameEN[index].String()
@@ -105,8 +110,9 @@ func convert(excelFileName string) {
 						// fmt.Printf("%s\t", d)
 					}
 				}
+				// fmt.Printf("lenNull = %d, len = %d, %t, %v\n", lenNull, len, lenNull < len, dMap);
 				// 过滤全空行
-				if lenNull < len {
+				if !isEmpty && lenNull < len {
 					data = append(data, dMap)
 				}
 				// fmt.Printf("\n")

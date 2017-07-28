@@ -28,7 +28,10 @@ _testmain.go
 .DS_Store
 src/github.com
 src/golang.org
+src/gopkg.in
 src/sourcegraph.com
 src/test/convertExcel/data
 src/test/convertExcel/output
 src/test/uploadAndRestart/data
+src/test/parseMesh/data
+src/test/parseMesh/output
