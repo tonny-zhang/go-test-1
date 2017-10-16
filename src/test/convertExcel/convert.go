@@ -23,8 +23,20 @@ var dirCurrent, err = os.Getwd()
 func errPrint(msg string) {
 	fmt.Printf("\x1b[31;1m%s\x1b[0m\n", msg)
 }
+func getNumStr(numStr string) (string, bool) {
+	i := strings.LastIndex(numStr, "%")
+	isHavePercent := i > 0 && i == strings.Count(numStr, "")-1-1
+	if isHavePercent {
+		numStr = numStr[0:i]
+	}
+	return numStr, isHavePercent
+}
 func convert(excelFileName string) {
 	excelFileName = strings.Replace(excelFileName, "\\", "/", -1)
+	if (strings.Index(path.Base(excelFileName), "~") == 0) {
+		fmt.Println(excelFileName+" 文件名不合法，或不是一个完整的excel文件")
+		return;
+	}
 	xlFile, err := xlsx.OpenFile(excelFileName)
 	if err != nil {
 		fmt.Println(err)
@@ -84,25 +96,33 @@ func convert(excelFileName string) {
 			if len > 0 && len <= lenZHCell {
 				var dMap = make(map[string]interface{})
 				var lenNull = 0
-				var isEmpty = false;
+				var isEmpty = false
 				for index, cell := range row.Cells {
 					if index < lenCellActual {
 						d, _ := cell.String()
 						if d == "" {
 							if index == 0 {
-								isEmpty = true;
-								break;
+								isEmpty = true
+								break
 							}
 							lenNull++
 						}
 						en, _ := nameEN[index].String()
 						t, _ := types[index].String()
+
+						numStr, isHavePercent := getNumStr(d)
 						if t == "int" {
-							valNumber, _ := strconv.Atoi(d)
+							valNumber, _ := strconv.Atoi(numStr)
 							dMap[en] = valNumber
+							if isHavePercent {
+								dMap[en+"_isp"] = true
+							}
 						} else if t == "float" {
-							valNumber, _ := strconv.ParseFloat(d, 64)
+							valNumber, _ := strconv.ParseFloat(numStr, 64)
 							dMap[en] = valNumber
+							if isHavePercent {
+								dMap[en+"_isp"] = true
+							}
 						} else {
 							dMap[en] = d
 						}
