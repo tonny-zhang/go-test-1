@@ -33,9 +33,9 @@ func getNumStr(numStr string) (string, bool) {
 }
 func convert(excelFileName string) {
 	excelFileName = strings.Replace(excelFileName, "\\", "/", -1)
-	if (strings.Index(path.Base(excelFileName), "~") == 0) {
-		fmt.Println(excelFileName+" 文件名不合法，或不是一个完整的excel文件")
-		return;
+	if strings.Index(path.Base(excelFileName), "~") == 0 {
+		fmt.Println(excelFileName + " 文件名不合法，或不是一个完整的excel文件")
+		return
 	}
 	xlFile, err := xlsx.OpenFile(excelFileName)
 	if err != nil {
@@ -109,6 +109,7 @@ func convert(excelFileName string) {
 						}
 						en, _ := nameEN[index].String()
 						t, _ := types[index].String()
+						t = strings.ToLower(t)
 
 						numStr, isHavePercent := getNumStr(d)
 						if t == "int" {
@@ -123,6 +124,8 @@ func convert(excelFileName string) {
 							if isHavePercent {
 								dMap[en+"_isp"] = true
 							}
+						} else if t == "bool" {
+							dMap[en] = strings.ToUpper(d) == "T"
 						} else {
 							dMap[en] = d
 						}
