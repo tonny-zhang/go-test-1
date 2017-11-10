@@ -89,6 +89,7 @@ func convert(excelFileName string) {
 		// fmt.Println(headerRow)
 		// b, err := json.Marshal(headerRow)
 		// fmt.Println(string(b), err, len(b))
+		// fmt.Printf("lenCellActual = %d\n", lenCellActual)
 
 		var data []map[string]interface{}
 		for _, row := range rows[4:] {
@@ -97,21 +98,25 @@ func convert(excelFileName string) {
 				var dMap = make(map[string]interface{})
 				var lenNull = 0
 				var isEmpty = false
-				for index, cell := range row.Cells {
+				// 强制读取，没有值时转换成默认值
+				for index := 0; index < lenCellActual; index++ {
+					var valStr = ""
+					if index < len {
+						valStr, _ = row.Cells[index].String()
+					}
 					if index < lenCellActual {
-						d, _ := cell.String()
-						if d == "" {
+						en, _ := nameEN[index].String()
+						t, _ := types[index].String()
+						t = strings.ToLower(t)
+						if valStr == "" {
 							if index == 0 {
 								isEmpty = true
 								break
 							}
 							lenNull++
 						}
-						en, _ := nameEN[index].String()
-						t, _ := types[index].String()
-						t = strings.ToLower(t)
 
-						numStr, isHavePercent := getNumStr(d)
+						numStr, isHavePercent := getNumStr(valStr)
 						if t == "int" {
 							valNumber, _ := strconv.Atoi(numStr)
 							dMap[en] = valNumber
@@ -125,15 +130,15 @@ func convert(excelFileName string) {
 								dMap[en+"_isp"] = true
 							}
 						} else if t == "bool" {
-							dMap[en] = strings.ToUpper(d) == "T"
+							dMap[en] = strings.ToUpper(valStr) == "T"
 						} else {
-							dMap[en] = d
+							dMap[en] = valStr
 						}
 
 						// fmt.Printf("%s\t", d)
 					}
 				}
-				// fmt.Printf("lenNull = %d, len = %d, %t, %v\n", lenNull, len, lenNull < len, dMap);
+				// fmt.Printf("lenNull = %d, len = %d, %t, %v\n", lenNull, len, lenNull < len, dMap)
 				// 过滤全空行
 				if !isEmpty && lenNull < len {
 					data = append(data, dMap)
