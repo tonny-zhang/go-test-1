@@ -138,9 +138,9 @@ func convert(excelFileName string) {
 						// fmt.Printf("%s\t", d)
 					}
 				}
-				// fmt.Printf("lenNull = %d, len = %d, %t, %v\n", lenNull, len, lenNull < len, dMap)
+				// fmt.Printf("lenNull = %d, len = %d, lenZh = %d, lenCellActual = %d, %t, %v\n", lenNull, len, lenZHCell, lenCellActual, lenNull < len, dMap)
 				// 过滤全空行
-				if !isEmpty && lenNull < len {
+				if !isEmpty {
 					data = append(data, dMap)
 				}
 				// fmt.Printf("\n")
