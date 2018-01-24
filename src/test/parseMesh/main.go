@@ -15,6 +15,9 @@ import (
 	"path"
 	"regexp"
 	"strconv"
+	"errors"
+
+	"github.com/nfnt/resize"
 )
 
 type root struct {
@@ -28,6 +31,7 @@ type scene struct {
 
 var regData, _ = regexp.Compile(`m_IndexBuffer:\s+(\w+?)\s[\s\S]*_typelessdata:\s+(\w+?)\s`)
 var dirCurrent, err = os.Getwd()
+const scale = 10;
 
 func errPrint(msg string) {
 	fmt.Printf("\x1b[31;1m%s\x1b[0m\n", msg)
@@ -92,7 +96,7 @@ func getPoint(indexArr []uint16, verticesArr [][]float32, width, height int) fun
 		return float64(int(v[0]*100 + widthHalfFloat)), float64(int(heightHalfFloat - v[1]*100))
 	}
 }
-func parseWithSize(meshPath string, width, height int) ([]byte, *image.RGBA, error) {
+func parseWithSize(meshPath string, width, height int) ([]byte, image.Image, error) {
 	indexArr, verticesArr, err := parseMesh(meshPath)
 
 	if err != nil {
@@ -104,7 +108,6 @@ func parseWithSize(meshPath string, width, height int) ([]byte, *image.RGBA, err
 
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	c := color.RGBA{255, 0, 0, 255}
-	// gc := draw2dimg.NewGraphicContext(dest)
 	for i := 0; i < lenIndex; i += 3 {
 		points := make([][]float64, 3)
 		x1, y1 := fnGetPoint(indexArr[i])
@@ -135,19 +138,31 @@ func parseWithSize(meshPath string, width, height int) ([]byte, *image.RGBA, err
 		}
 	}
 
-	lenResult := int(math.Ceil(float64(width * height / 8)))
-	resultBytes := make([]byte, lenResult+8)
-	binary.LittleEndian.PutUint32(resultBytes, uint32(width))
-	binary.LittleEndian.PutUint32(resultBytes[4:], uint32(height))
-	dataWritedIndex := 8
+	widthMini := uint(math.Ceil(float64(width/scale)))
+	imgMini := resize.Resize(widthMini, 0, img, resize.NearestNeighbor)
+	widthNew := imgMini.Bounds().Dx()
+	heightNew := imgMini.Bounds().Dy()
+	fmt.Printf("widthMin = %d, heightMin = %d, scale = %d\n", widthNew, heightNew, scale)
+
+	imgMiniRGBA, ok := imgMini.(*image.RGBA)
+	if (!ok) {
+		fmt.Printf("%s\n", "convert to rgba error");
+		return nil, nil, errors.New("convert to rgba error")
+	}
+	lenResult := int(math.Ceil(float64(widthNew * heightNew / 8)))
+	resultBytes := make([]byte, lenResult + 4 + 4 + 4)
+	binary.LittleEndian.PutUint32(resultBytes, uint32(widthNew))
+	binary.LittleEndian.PutUint32(resultBytes[4:], uint32(heightNew))
+	binary.LittleEndian.PutUint32(resultBytes[8:], uint32(scale))
+	dataWritedIndex := 12
 	lenWrited := 0
 	var dataWrited byte
-	resultArr := make([][]int, width)
-	for i := 0; i < width; i++ {
-		rowArr := make([]int, height)
-		for j := 0; j < height; j++ {
+	resultArr := make([][]int, widthNew)
+	for i := 0; i < widthNew; i++ {
+		rowArr := make([]int, heightNew)
+		for j := 0; j < heightNew; j++ {
 			var v int
-			if img.RGBAAt(i, j).A > 0 {
+			if imgMiniRGBA.RGBAAt(i, j).A > 0 {
 				v = 1
 			}
 			rowArr[j] = v
@@ -168,17 +183,17 @@ func parseWithSize(meshPath string, width, height int) ([]byte, *image.RGBA, err
 	if lenWrited > 0 && dataWritedIndex < lenResult {
 		resultBytes[dataWritedIndex] = dataWrited
 	}
-	return resultBytes, img, nil
-	// fResult, err := os.Create("result-bf.bat")
-	// defer fResult.Close()
-	// fResult.Write(resultBytes)
 
-	// imgfile, _ := os.Create("test.png")
+	
+	// dirMeshImg := path.Join(dirCurrent, "meshImg")
+	// imgfile, _ := os.Create(path.Join(dirMeshImg, "1.png"))
 	// defer imgfile.Close()
-	// png.Encode(imgfile, img)
-	// return nil
+	// png.Encode(imgfile, imgMini)
+
+	fmt.Println("");
+	return resultBytes, imgMini, nil
 }
-func parse(meshPath, imgPath string) ([]byte, *image.RGBA, error) {
+func parse(meshPath, imgPath string) ([]byte, image.Image, error) {
 	width, height, errImg := getImgSize(imgPath)
 
 	if errImg != nil {
