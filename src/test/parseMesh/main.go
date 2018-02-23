@@ -31,7 +31,7 @@ type scene struct {
 
 var regData, _ = regexp.Compile(`m_IndexBuffer:\s+(\w+?)\s[\s\S]*_typelessdata:\s+(\w+?)\s`)
 var dirCurrent, err = os.Getwd()
-const scale = 10;
+const scale = 1;
 
 func errPrint(msg string) {
 	fmt.Printf("\x1b[31;1m%s\x1b[0m\n", msg)
