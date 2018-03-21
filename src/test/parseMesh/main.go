@@ -252,20 +252,35 @@ func main() {
 						fmt.Println(index, res)
 						width, _ := strconv.ParseInt(v.Width, 10, 32)
 						height, _ := strconv.ParseInt(v.Height, 10, 32)
-						resultByte, img, err := parseWithSize(path.Join(dirData, res+".asset"), int(width), int(height))
-						if nil == err {
-							fResult, _ := os.Create(path.Join(dirMeshData, res+".dat"))
-							defer fResult.Close()
-							fResult.Write(resultByte)
-
-							imgfile, _ := os.Create(path.Join(dirMeshImg, res+".png"))
-							defer imgfile.Close()
-							png.Encode(imgfile, img)
-							fmt.Println(res + "------")
+						pathAsset := path.Join(dirData, res+".asset")
+						pathDat := path.Join(dirMeshData, res+".dat")
+						pathImg := path.Join(dirMeshImg, res+".png")
+						if infoAsset, err := os.Stat(pathAsset); !os.IsNotExist(err) {
+							infoDat, errDat := os.Stat(pathDat); 
+							infoImg, errImg := os.Stat(pathImg);
+							// 已经生成的数据文件或图片在源文件修改时间后可以说明源文件没有修改，没有修改时不用重复生成，减小生成的总时间
+							if (os.IsNotExist(errDat) || infoAsset.ModTime().Unix() > infoDat.ModTime().Unix()) ||
+								(os.IsNotExist(errImg) || infoAsset.ModTime().Unix() > infoImg.ModTime().Unix()) {
+									resultByte, img, err := parseWithSize(pathAsset, int(width), int(height))
+									if nil == err {
+										fResult, _ := os.Create(pathDat)
+										defer fResult.Close()
+										fResult.Write(resultByte)
+			
+										imgfile, _ := os.Create(pathImg)
+										defer imgfile.Close()
+										png.Encode(imgfile, img)
+										fmt.Println(res + "------")
+									} else {
+										fmt.Println(err)
+										errPrint(res + "处理出现错误")
+									}
+							} else {
+								errPrint(res + "文件没有更改");
+							}
 						} else {
-							fmt.Println(err)
-							errPrint(res + "处理出现错误")
-						}
+							errPrint(res + "不存在")
+						}						
 					}
 				} else {
 					fmt.Println(err)
