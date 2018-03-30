@@ -18,7 +18,7 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
-var dirCurrent, err = os.Getwd()
+var dirConver, err = os.Getwd()
 
 func errPrint(msg string) {
 	fmt.Printf("\x1b[31;1m%s\x1b[0m\n", msg)
@@ -156,7 +156,7 @@ func convert(excelFileName string) {
 		bResult, _ := json.Marshal(result)
 		// fmt.Println(string(bResult), errResult, len(bResult))
 
-		outputdir := path.Join(dirCurrent, "output")
+		outputdir := path.Join(dirConver, "output")
 		os.MkdirAll(outputdir, os.ModePerm)
 
 		regPostfix := regexp.MustCompile("\\..+$")
@@ -195,7 +195,12 @@ func main() {
 	// reg := regexp.MustCompile("\\..+$")
 	// fmt.Println(reg.ReplaceAllString(path.Base(file), ".json"))
 
-	dirExcel := path.Join(dirCurrent, "data")
+	args := os.Args
+	if (len(args) > 1) {
+		dirConver = args[1]
+	}
+	
+	dirExcel := path.Join(dirConver, "data")
 	if info, err := os.Stat(dirExcel); !os.IsNotExist(err) && info.IsDir() {
 		walk(dirExcel)
 		reader := bufio.NewReader(os.Stdin)
@@ -203,6 +208,6 @@ func main() {
 		reader.ReadByte()
 		os.Exit(0)
 	} else {
-		errPrint("当前目录下没有用于存放excel文件的data目录")
+		errPrint("目录["+dirConver+"]下没有用于存放excel文件的data目录")
 	}
 }
