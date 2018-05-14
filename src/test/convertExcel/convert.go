@@ -62,20 +62,20 @@ func convert(excelFileName string) {
 		var lenCellActual = 0
 		var headerRow []map[string]string
 		for i, cell := range nameZH {
-			name, _ := cell.String()
+			name := cell.String()
 			if len(name) == 0 || i >= lenEnCell {
 				break
 			}
 			enCell := nameEN[i]
 			if nil != enCell {
 				cellHeader := make(map[string]string)
-				en, _ := enCell.String()
+				en := enCell.String()
 				cellHeader["name"] = name
 				cellHeader["en"] = en
 
 				typeCell := types[i]
 				if nil != typeCell {
-					t, _ := types[i].String()
+					t := types[i].String()
 					cellHeader["type"] = t
 				}
 				headerRow = append(headerRow, cellHeader)
@@ -102,11 +102,11 @@ func convert(excelFileName string) {
 				for index := 0; index < lenCellActual; index++ {
 					var valStr = ""
 					if index < len {
-						valStr, _ = row.Cells[index].String()
+						valStr = row.Cells[index].String()
 					}
 					if index < lenCellActual {
-						en, _ := nameEN[index].String()
-						t, _ := types[index].String()
+						en := nameEN[index].String()
+						t := types[index].String()
 						t = strings.ToLower(t)
 						if valStr == "" {
 							if index == 0 {
