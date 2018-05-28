@@ -33,7 +33,7 @@ src/gopkg.in
 src/sourcegraph.com
 src/test/convertExcel/data
 src/test/convertExcel/output
-src/test/convertExcel/excel
+src/test/json2excel/excel
 src/test/uploadAndRestart/data
 src/test/parseMesh/data
 src/test/parseMesh/meshData
