@@ -57,7 +57,7 @@ func convert(excelFileName string) {
 		types := rows[1].Cells
 		nameEN := rows[2].Cells
 
-		lenZHCell := len(nameZH)
+		// lenZHCell := len(nameZH)
 		lenEnCell := len(nameEN)
 		var lenCellActual = 0
 		var headerRow []map[string]string
@@ -92,64 +92,64 @@ func convert(excelFileName string) {
 		// fmt.Printf("lenCellActual = %d\n", lenCellActual)
 
 		var data []map[string]interface{}
+		lenReaded := 0
 		for _, row := range rows[4:] {
 			len := len(row.Cells)
-			if len > 0 && len <= lenZHCell {
-				var dMap = make(map[string]interface{})
-				var lenNull = 0
-				var isEmpty = false
-				// 强制读取，没有值时转换成默认值
-				for index := 0; index < lenCellActual; index++ {
-					var valStr = ""
-					if index < len {
-						valStr = row.Cells[index].String()
-					}
-					if index < lenCellActual {
-						en := nameEN[index].String()
-						t := types[index].String()
-						t = strings.ToLower(t)
-						if valStr == "" {
-							if index == 0 {
-								isEmpty = true
-								break
-							}
-							lenNull++
-						}
-
-						numStr, isHavePercent := getNumStr(valStr)
-						if t == "int" {
-							valNumber, _ := strconv.Atoi(numStr)
-							dMap[en] = valNumber
-							if isHavePercent {
-								dMap[en+"_isp"] = true
-							}
-						} else if t == "float" {
-							valNumber, _ := strconv.ParseFloat(numStr, 64)
-							dMap[en] = valNumber
-							if isHavePercent {
-								dMap[en+"_isp"] = true
-							}
-						} else if t == "bool" {
-							dMap[en] = strings.ToUpper(valStr) == "T"
-						} else {
-							dMap[en] = valStr
-						}
-
-						// fmt.Printf("%s\t", d)
-					}
+			// if len > 0 && len <= lenZHCell {
+			var dMap = make(map[string]interface{})
+			var lenNull = 0
+			var isEmpty = false
+			// 强制读取，没有值时转换成默认值
+			for index := 0; index < lenCellActual; index++ {
+				var valStr = ""
+				if index < len {
+					valStr = row.Cells[index].String()
 				}
-				// fmt.Printf("lenNull = %d, len = %d, lenZh = %d, lenCellActual = %d, %t, %v\n", lenNull, len, lenZHCell, lenCellActual, lenNull < len, dMap)
-				// 过滤全空行
-				if !isEmpty {
-					data = append(data, dMap)
+				if index < lenCellActual {
+					en := nameEN[index].String()
+					t := types[index].String()
+					t = strings.ToLower(t)
+					if valStr == "" {
+						if index == 0 {
+							isEmpty = true
+							break
+						}
+						lenNull++
+					}
+
+					numStr, isHavePercent := getNumStr(valStr)
+					if t == "int" {
+						valNumber, _ := strconv.Atoi(numStr)
+						dMap[en] = valNumber
+						if isHavePercent {
+							dMap[en+"_isp"] = true
+						}
+					} else if t == "float" {
+						valNumber, _ := strconv.ParseFloat(numStr, 64)
+						dMap[en] = valNumber
+						if isHavePercent {
+							dMap[en+"_isp"] = true
+						}
+					} else if t == "bool" {
+						dMap[en] = strings.ToUpper(valStr) == "T"
+					} else {
+						dMap[en] = valStr
+					}
+
+					// fmt.Printf("%s\t", d)
 				}
-				// fmt.Printf("\n")
+			}
+			// fmt.Printf("lenNull = %d, len = %d, lenZh = %d, lenCellActual = %d, %t, %v\n", lenNull, len, lenZHCell, lenCellActual, lenNull < len, dMap)
+			// 过滤全空行
+			if !isEmpty {
+				lenReaded++
+				data = append(data, dMap)
 			}
 		}
 
 		// b1, err1 := json.Marshal(data)
 		// fmt.Println(string(b1), err1, len(b1))
-
+		// fmt.Printf("len = %d, datalen = %d, len_readed = %d, lenCellActual = %d\n", len(rows)-4, len(data), lenReaded, lenCellActual)
 		result := make(map[string]interface{})
 		result["header"] = headerRow
 		result["root"] = data
@@ -196,10 +196,10 @@ func main() {
 	// fmt.Println(reg.ReplaceAllString(path.Base(file), ".json"))
 
 	args := os.Args
-	if (len(args) > 1) {
+	if len(args) > 1 {
 		dirConver = args[1]
 	}
-	
+
 	dirExcel := path.Join(dirConver, "data")
 	if info, err := os.Stat(dirExcel); !os.IsNotExist(err) && info.IsDir() {
 		walk(dirExcel)
@@ -208,6 +208,6 @@ func main() {
 		reader.ReadByte()
 		os.Exit(0)
 	} else {
-		errPrint("目录["+dirConver+"]下没有用于存放excel文件的data目录")
+		errPrint("目录[" + dirConver + "]下没有用于存放excel文件的data目录")
 	}
 }
