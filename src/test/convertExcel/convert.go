@@ -21,7 +21,7 @@ import (
 var dirConver, err = os.Getwd()
 
 func errPrint(msg string) {
-	fmt.Printf("\x1b[31;1m%s\x1b[0m\n", msg)
+	fmt.Printf("!!\n\x1b[31;1m%s\x1b[0m\n!!\n\n", msg)
 }
 func getNumStr(numStr string) (string, bool) {
 	i := strings.LastIndex(numStr, "%")
@@ -61,6 +61,8 @@ func convert(excelFileName string) {
 		lenEnCell := len(nameEN)
 		var lenCellActual = 0
 		var headerRow []map[string]string
+		headerCache := make(map[string]bool)
+
 		for i, cell := range nameZH {
 			name := cell.String()
 			if len(name) == 0 || i >= lenEnCell {
@@ -73,6 +75,12 @@ func convert(excelFileName string) {
 				cellHeader["name"] = name
 				cellHeader["en"] = en
 
+				if headerCache[en] {
+					errPrint(excelFileName + " 字段[" + en + "]重复")
+					return
+				}
+
+				headerCache[en] = true
 				typeCell := types[i]
 				if nil != typeCell {
 					t := types[i].String()
