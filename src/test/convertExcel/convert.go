@@ -91,10 +91,15 @@ func convert(excelFileName string) {
 		// fmt.Println(string(b), err, len(b))
 		// fmt.Printf("lenCellActual = %d\n", lenCellActual)
 
+		// fmt.Printf("len_header = %d\n", lenEnCell)
 		var data []map[string]interface{}
 		lenReaded := 0
 		for _, row := range rows[4:] {
+			// if i != 32 {
+			// 	// continue
+			// }
 			len := len(row.Cells)
+			// fmt.Printf("len = %d\n", len)
 			// if len > 0 && len <= lenZHCell {
 			var dMap = make(map[string]interface{})
 			var lenNull = 0
@@ -117,6 +122,7 @@ func convert(excelFileName string) {
 						lenNull++
 					}
 
+					// fmt.Printf("%d, %s, %s = %s\n", index, types[index].String(), en, valStr)
 					numStr, isHavePercent := getNumStr(valStr)
 					if t == "int" {
 						valNumber, _ := strconv.Atoi(numStr)
@@ -130,6 +136,7 @@ func convert(excelFileName string) {
 						if isHavePercent {
 							dMap[en+"_isp"] = true
 						}
+						// fmt.Printf("%s = %f\n", numStr, valNumber)
 					} else if t == "bool" {
 						dMap[en] = strings.ToUpper(valStr) == "T"
 					} else {
