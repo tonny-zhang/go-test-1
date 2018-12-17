@@ -24,6 +24,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+*.rdb
 
 .DS_Store
 release

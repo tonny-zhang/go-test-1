@@ -34,12 +34,14 @@ func getNumStr(numStr string) (string, bool) {
 func convert(excelFileName string) {
 	excelFileName = strings.Replace(excelFileName, "\\", "/", -1)
 	if strings.Index(path.Base(excelFileName), "~") == 0 {
-		fmt.Println(excelFileName + " 文件名不合法，或不是一个完整的excel文件")
+		errPrint(excelFileName + " 文件名不合法，或不是一个完整的excel文件")
 		return
 	}
 	xlFile, err := xlsx.OpenFile(excelFileName)
 	if err != nil {
 		fmt.Println(err)
+		errPrint(excelFileName + " 文件内容错误，请检查最后几行空行")
+		return;
 	}
 	defer func() {
 		if r := recover(); r != nil {
