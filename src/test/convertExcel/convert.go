@@ -41,7 +41,7 @@ func convert(excelFileName string) {
 	if err != nil {
 		fmt.Println(err)
 		errPrint(excelFileName + " 文件内容错误，请检查最后几行空行")
-		return;
+		return
 	}
 	defer func() {
 		if r := recover(); r != nil {
